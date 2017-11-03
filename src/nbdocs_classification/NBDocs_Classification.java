@@ -3,8 +3,6 @@ package nbdocs_classification;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-
-
 import java.util.*;
 
 class FilesUtil {
@@ -20,7 +18,8 @@ class Compute
     long[][] freqtable = new long[89527][2];    
     long numberPositive = 0;
     long numberNegative = 0;
-    long numberDocs = 0,correctClass = 0;
+    long numberDocs = 0;
+    long correctlyPos = 0,wronglyPos = 0, correctlyNeg = 0, wronglyNeg = 0;
     
     void updateFreq(int word,int freq,int sentiment)
     {
@@ -34,15 +33,40 @@ class Compute
     
     public void updateStats(int estimate, int actual)
     {
-        if(estimate==actual)
-            correctClass++;
-        numberDocs++;
+        if(actual == 1)
+        {
+            if(estimate == 1)
+                correctlyPos++;
+            else 
+                wronglyNeg++;
+        }
+        else if(actual == 0)
+        {
+            if (estimate == 0) {
+                correctlyNeg++;
+            } else {
+                wronglyPos++;
+            }
+        }
+       numberDocs++;
     }
     
-     public double returnAccuracy()
+     public double positivePrecision()
     {
-        return ((double)correctClass/numberDocs)*100;
+        return ((double)correctlyPos/(correctlyPos + wronglyPos))*100;
     }
+     public double negativePrecision()
+    {
+        return ((double)correctlyNeg/(correctlyNeg + wronglyNeg))*100;
+    }
+     public double positiveRecall()
+     {
+         return ((double)correctlyPos/(correctlyPos + wronglyNeg))*100;
+     }
+     public double negativeRecall()
+     {
+         return ((double)correctlyNeg/(correctlyNeg + wronglyPos))*100;
+     }
     
 }
 
@@ -74,34 +98,20 @@ public class NBDocs_Classification {
         
         while (trainFileToken.hasMoreTokens())
         {
-            docClassify.testExample(trainFileToken.nextToken());
+            docClassify.testInstance(trainFileToken.nextToken());
         }
-        //System.out.println(test);
-       //docClassify.testExample(test);
-        //docClassify.printtemp();
-          docClassify.printAccuracy();
+          docClassify.printStats();
    }
-    public void printAccuracy()
+    public void printStats()
     {
-        System.out.println(compute.returnAccuracy() + "%"); 
+        System.out.println("For Positive Sentiment of Basic NB, Precision is " + compute.positivePrecision() + "% and Recall is " + compute.positiveRecall() + "%"); 
+        System.out.println("For Negative Sentiment of Basic NB, Precision is " + compute.negativePrecision() + "% and Recall is " + compute.negativeRecall() + "%"); 
     }
     public void calculateProb()
     {
-       // probpos = Math.log10((double)compute.numberPositive) - Math.log((double)(compute.numberNegative + compute.numberPositive));
-        //probneg = Math.log10((double)compute.numberNegative) - Math.log((double)(compute.numberNegative + compute.numberPositive));
         double total = (double)(compute.numberNegative + compute.numberPositive);
         probpos = ((double)compute.numberPositive)/total;
         probneg = ((double)compute.numberNegative)/total;
-    }
-    
-    public void printtemp()
-    {
-        int i;
-        for(i=70; i < 75; i++)
-        {
-            
-            System.out.println(compute.freqtable[i][1]);
-        }
     }
     public void newDocument(String token)
     {
@@ -123,7 +133,7 @@ public class NBDocs_Classification {
             compute.updateFreq(word,freq,sentiment);
         }
     }
-    public void testExample(String token)
+    public void testInstance(String token)
     {
         int estimateSentiment,word=0,freq=1,actualSentiment;
         double pPositive = 0,pNegative = 0, resultProb = 0;
@@ -146,7 +156,6 @@ public class NBDocs_Classification {
           
             pPositive = pPositive + (double)freq*( Math.log10(((double)(compute.freqtable[word][1] + 1))) - Math.log10((double)compute.numberPositive + vocab));
             pNegative = pNegative + (double)freq*(Math.log10(((double)(compute.freqtable[word][0] + 1))) - Math.log10(((double)compute.numberNegative + vocab)));
-            //System.out.println(Math.log10(((double)(compute.freqtable[word][0] + 1))) + "|||" + Math.log10(((double)compute.numberNegative + vocab)));
             
         }
         
