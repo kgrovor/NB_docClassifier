@@ -16,11 +16,19 @@ class FilesUtil {
 }
 class Compute
 {
-    int[][] freqtable = new int[89527][2];
+    long[][] freqtable = new long[89527][2];    
+    long numberPositive = 0;
+    long numberNegative = 0;
     void updateFreq(int word,int freq,int sentiment)
     {
         freqtable[word][sentiment] = freqtable[word][sentiment] + freq;
+        if (sentiment == 1) {
+            numberPositive = numberPositive + freq;
+        } else {
+            numberNegative = numberNegative + freq;
+        }
     }
+    
     
 }
 
@@ -30,6 +38,8 @@ public class NBDocs_Classification {
      * @param args the command line arguments
      */
     Compute compute = new Compute();
+    int vocab = 89527;
+    double probpos, probneg;
     public static void main(String[] args) throws IOException {
         int i;
         NBDocs_Classification docClassify = new NBDocs_Classification();
@@ -40,8 +50,20 @@ public class NBDocs_Classification {
         {
             docClassify.newDocument(fileToken.nextToken());
         }
-        docClassify.printtemp();
+        
+        docClassify.calculateProb();
+        String test = FilesUtil.readTextFile("./train.txt");
+        System.out.println(test);
+        docClassify.testExample(test);
+        //docClassify.printtemp();
+        
    }
+    public void calculateProb()
+    {
+        probpos = Math.log10((double)compute.numberPositive) - Math.log((double)(compute.numberNegative + compute.numberPositive));
+        probneg = Math.log10((double)compute.numberNegative) - Math.log((double)(compute.numberNegative + compute.numberPositive));
+        
+    }
     public void printtemp()
     {
         int i;
@@ -70,6 +92,45 @@ public class NBDocs_Classification {
             freq = Integer.parseInt(immediate.nextToken());
             compute.updateFreq(word,freq,sentiment);
         }
+    }
+    public void testExample(String token)
+    {
+        int sentiment,word=0,freq=1,actualSentiment;
+        double pPositive = 0,pNegative = 0, resultProb = 0;
+        String currentToken,temp= "temp",temp2="temp";
+        StringTokenizer docToken = new StringTokenizer(token, " ");
+        if(Character.getNumericValue(docToken.nextToken().charAt(0)) >= 7)
+                actualSentiment = 1;
+        else 
+            actualSentiment = 0;
+        while(docToken.hasMoreTokens())
+        {
+            currentToken = docToken.nextToken();
+            StringTokenizer immediate = new StringTokenizer(currentToken,":\n");
+            //temp =immediate.nextToken();
+            word = Integer.parseInt(immediate.nextToken());
+            try {
+                //temp2 =immediate.nextToken();
+                freq = Integer.parseInt(immediate.nextToken());
+            } catch (Exception e) {
+                System.out.println("Extra newline is present");
+            }
+          
+            pPositive = pPositive + (double)freq*( Math.log10(((double)(compute.freqtable[word][0] + 1))) - Math.log10((double)compute.numberPositive + vocab));
+            pNegative = pNegative + (double)freq* (Math.log10(((double)(compute.freqtable[word][1] + 1))) - Math.log10(((double)compute.numberNegative + vocab)));
+            //System.out.println(Math.log10(((double)(compute.freqtable[word][0] + 1))) + "|||" + Math.log10(((double)compute.numberNegative + vocab)));
+            
+        }
+        
+        if(pPositive + probpos >= pNegative + probneg)
+        {
+            System.out.println(pPositive + " " + pNegative );
+            System.out.println(probpos +" " +  probneg + " num Pos" + compute.numberPositive + " neg " + compute.numberNegative);
+            System.out.println("Positive (1) and actual sentiment is " + actualSentiment);
+        }
+        else
+            System.out.println("Negative (0) and actual sentiment is " + actualSentiment);
+        
     }
   }
     
