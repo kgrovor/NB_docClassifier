@@ -54,20 +54,22 @@ public class NBDocs_Classification {
         docClassify.calculateProb();
         String test = FilesUtil.readTextFile("./train.txt");
         System.out.println(test);
-        docClassify.testExample(test);
-        //docClassify.printtemp();
+       //docClassify.testExample(test);
+        docClassify.printtemp();
         
    }
     public void calculateProb()
     {
-        probpos = Math.log10((double)compute.numberPositive) - Math.log((double)(compute.numberNegative + compute.numberPositive));
-        probneg = Math.log10((double)compute.numberNegative) - Math.log((double)(compute.numberNegative + compute.numberPositive));
-        
+       // probpos = Math.log10((double)compute.numberPositive) - Math.log((double)(compute.numberNegative + compute.numberPositive));
+        //probneg = Math.log10((double)compute.numberNegative) - Math.log((double)(compute.numberNegative + compute.numberPositive));
+        double total = (double)(compute.numberNegative + compute.numberPositive);
+        probpos = ((double)compute.numberPositive)/total;
+        probneg = ((double)compute.numberNegative)/total;
     }
     public void printtemp()
     {
         int i;
-        for(i=0; i < 5; i++)
+        for(i=70; i < 75; i++)
         {
             
             System.out.println(compute.freqtable[i][1]);
@@ -116,16 +118,16 @@ public class NBDocs_Classification {
                 System.out.println("Extra newline is present");
             }
           
-            pPositive = pPositive + (double)freq*( Math.log10(((double)(compute.freqtable[word][0] + 1))) - Math.log10((double)compute.numberPositive + vocab));
-            pNegative = pNegative + (double)freq* (Math.log10(((double)(compute.freqtable[word][1] + 1))) - Math.log10(((double)compute.numberNegative + vocab)));
+            pPositive = pPositive + (double)freq*(-1)*( Math.log10(((double)(compute.freqtable[word][0] + 1))) - Math.log10((double)compute.numberPositive + vocab));
+            pNegative = pNegative + (double)freq*(-1)*(Math.log10(((double)(compute.freqtable[word][1] + 1))) - Math.log10(((double)compute.numberNegative + vocab)));
             //System.out.println(Math.log10(((double)(compute.freqtable[word][0] + 1))) + "|||" + Math.log10(((double)compute.numberNegative + vocab)));
             
         }
-        
-        if(pPositive + probpos >= pNegative + probneg)
+        System.out.println(pPositive + " " + pNegative + " " + (probneg+probpos));
+        System.out.println(probpos +" " +  probneg + " num Pos" + compute.numberPositive + " neg " + compute.numberNegative);
+        if((pPositive + Math.log10(probpos)) >= pNegative + Math.log10(probneg))
         {
-            System.out.println(pPositive + " " + pNegative );
-            System.out.println(probpos +" " +  probneg + " num Pos" + compute.numberPositive + " neg " + compute.numberNegative);
+            
             System.out.println("Positive (1) and actual sentiment is " + actualSentiment);
         }
         else
