@@ -5,6 +5,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
+ /**
+ * 
+ * Utility Class for File Input
+ */
 class FilesUtil {
     public static String readTextFile(String fileName) throws IOException {
         String content = new String(Files.readAllBytes(Paths.get(fileName).toAbsolutePath()));
@@ -12,7 +16,10 @@ class FilesUtil {
     }
 
 }
-
+/**
+ * 
+ * Performs all the mathematical calculations
+ */
 class Compute
 {
     long[][] freqtable = new long[89527][2];    
@@ -20,7 +27,13 @@ class Compute
     long numberNegative = 0;
     long numberDocs = 0;
     long correctlyPos = 0,wronglyPos = 0, correctlyNeg = 0, wronglyNeg = 0;
-    
+    /**
+     * 
+     * @param word Index of word
+     * @param freq Frequency of given word
+     * @param sentiment Positive (1) or Negative (0)
+     * Method updates the frequency table and sets the number of positive/negative appearances variable
+     */
     void updateFreq(int word,int freq,int sentiment)
     {
         freqtable[word][sentiment] = freqtable[word][sentiment] + freq;
@@ -30,7 +43,11 @@ class Compute
             numberNegative = numberNegative + freq;
         }
     }
-    
+    /**
+     * 
+     * @param estimate Estimated Rating
+     * @param actual Actual Rating
+     */
     public void updateStats(int estimate, int actual)
     {
         if(actual == 1)
@@ -67,23 +84,38 @@ class Compute
      {
          return ((double)correctlyNeg/(correctlyNeg + wronglyPos))*100;
      }
+     public double positivef1()
+     {
+         return ((2*positivePrecision()*positiveRecall())/positivePrecision() + positiveRecall())/10000;
+     }
+      public double negativef1()
+     {
+         return (((2*negativePrecision()*negativeRecall())/(negativePrecision() + negativeRecall())))/10000;
+     }
     
 }
 
 
-
+/**
+ * 
+ * Main Class
+ */
 public class NBDocs_Classification {
 
     /**
-     * @param args the command line arguments
+     * @param train Path to training data file
+     * @param test Path to testing data file
+     * @param type String with type of classification
+     * @param bool_freq Determines if Binary NB or Multivariate
      */
-    public NBDocs_Classification(String train,String test, String type) throws IOException{
+    public NBDocs_Classification(String train,String test, String type, int bool_freq) throws IOException{ 
+        binary = bool_freq;
         String input = FilesUtil.readTextFile(train);
         StringTokenizer fileToken = new StringTokenizer(input, "\n"); //"!*^.
         
         while (fileToken.hasMoreTokens())
         {
-            newDocument(fileToken.nextToken());
+            newDocument(fileToken.nextToken(),binary);
         }
         
         calculateProb();
@@ -94,7 +126,7 @@ public class NBDocs_Classification {
         
         while (trainFileToken.hasMoreTokens())
         {
-            testInstance(trainFileToken.nextToken());
+            testInstance(trainFileToken.nextToken(), binary);
         }
           printStats(type);
     }
@@ -103,25 +135,40 @@ public class NBDocs_Classification {
     Compute compute = new Compute();
     int vocab = 89527;
     double probpos, probneg;
+    int binary;
     public static void main(String[] args) throws IOException {
-        int i;
-        NBDocs_Classification docClassify = new NBDocs_Classification("data/train/labeledBow.txt", "data/test/Labeledtest.txt"," Basic ");
-        NBDocs_Classification stopwordClassify = new NBDocs_Classification("data/no_stopwords_train.txt", "data/no_stopwords_test.txt"," Stopword Removed ");
-
+        NBDocs_Classification docClassify = new NBDocs_Classification("data/train/labeledBow.txt", "data/test/Labeledtest.txt"," Basic ", 0);
+        NBDocs_Classification stopwordClassify = new NBDocs_Classification("data/no_stopwords_train.txt", "data/no_stopwords_test.txt"," Stopword Removed ", 0);
+        NBDocs_Classification binClassify = new NBDocs_Classification("data/train/labeledBow.txt", "data/test/Labeledtest.txt"," Binary ", 1);
           
    }
+    /**
+     * 
+     * Prints output 
+     */
+    
     public void printStats(String type)
     {
-        System.out.println("For Positive Sentiment of" + type + "NB, Precision is " + compute.positivePrecision() + "% and Recall is " + compute.positiveRecall() + "%"); 
-        System.out.println("For Negative Sentiment of" + type + "NB, Precision is " + compute.negativePrecision() + "% and Recall is " + compute.negativeRecall() + "%"); 
+        System.out.println("For Positive Sentiment of" + type + "NB, Precision is " + compute.positivePrecision() + "% , Recall is " + compute.positiveRecall() + "%" + " and F1 measure is " + compute.positivef1()); 
+        System.out.println("For Negative Sentiment of" + type + "NB, Precision is " + compute.negativePrecision() + "% , Recall is " + compute.negativeRecall() + "%" + " and F1 measure is " + compute.negativef1()); 
+        System.out.println("");
     }
+    /**
+     * Calculates P(+ve) / P(-ve) term of Naive Bayes
+     */
     public void calculateProb()
     {
         double total = (double)(compute.numberNegative + compute.numberPositive);
         probpos = ((double)compute.numberPositive)/total;
         probneg = ((double)compute.numberNegative)/total;
     }
-    public void newDocument(String token)
+    /**
+     * 
+     * @param token Document data
+     * @param bool_freq Binary vs Multivariate
+     * This method adds a new training instance example to the data
+     */
+    public void newDocument(String token,int bool_freq)
     {
         int sentiment,word,freq;
         String currentToken;
@@ -137,11 +184,20 @@ public class NBDocs_Classification {
             currentToken = docToken.nextToken();
             StringTokenizer immediate = new StringTokenizer(currentToken,":");
             word = Integer.parseInt(immediate.nextToken());
-            freq = Integer.parseInt(immediate.nextToken());
+            if(bool_freq == 0)
+                freq = Integer.parseInt(immediate.nextToken());
+            else 
+                freq = 1;
             compute.updateFreq(word,freq,sentiment);
         }
     }
-    public void testInstance(String token)
+    /**
+     * 
+     * @param token Document data
+     * @param bool_freq Binary vs Multivariate
+     * This Method determines sentiment for a test example
+     */
+    public void testInstance(String token, int bool_freq)
     {
         int estimateSentiment,word=0,freq=1,actualSentiment;
         double pPositive = 0,pNegative = 0, resultProb = 0;
@@ -157,7 +213,10 @@ public class NBDocs_Classification {
             StringTokenizer immediate = new StringTokenizer(currentToken,":\n");
             word = Integer.parseInt(immediate.nextToken());
             try {
-                freq = Integer.parseInt(immediate.nextToken());
+                if(bool_freq == 0)
+                    freq = Integer.parseInt(immediate.nextToken());
+                else 
+                    freq = 1;
             } catch (Exception e) {
                 System.out.println("Extra newline is present");
             }
