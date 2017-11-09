@@ -77,35 +77,43 @@ public class NBDocs_Classification {
     /**
      * @param args the command line arguments
      */
+    public NBDocs_Classification(String train,String test, String type) throws IOException{
+        String input = FilesUtil.readTextFile(train);
+        StringTokenizer fileToken = new StringTokenizer(input, "\n"); //"!*^.
+        
+        while (fileToken.hasMoreTokens())
+        {
+            newDocument(fileToken.nextToken());
+        }
+        
+        calculateProb();
+        //String test = FilesUtil.readTextFile("data/test/Labeledtest.txt");
+        String testdata = FilesUtil.readTextFile(test);
+        
+        StringTokenizer trainFileToken = new StringTokenizer(testdata, "\n"); //"!*^.
+        
+        while (trainFileToken.hasMoreTokens())
+        {
+            testInstance(trainFileToken.nextToken());
+        }
+          printStats(type);
+    }
+
+    
     Compute compute = new Compute();
     int vocab = 89527;
     double probpos, probneg;
     public static void main(String[] args) throws IOException {
         int i;
-        NBDocs_Classification docClassify = new NBDocs_Classification();
-        String input = FilesUtil.readTextFile("data/train/labeledBow.txt");
-        StringTokenizer fileToken = new StringTokenizer(input, "\n"); //"!*^.
-        
-        while (fileToken.hasMoreTokens())
-        {
-            docClassify.newDocument(fileToken.nextToken());
-        }
-        
-        docClassify.calculateProb();
-        String test = FilesUtil.readTextFile("data/test/Labeledtest.txt");
-        
-        StringTokenizer trainFileToken = new StringTokenizer(test, "\n"); //"!*^.
-        
-        while (trainFileToken.hasMoreTokens())
-        {
-            docClassify.testInstance(trainFileToken.nextToken());
-        }
-          docClassify.printStats();
+        NBDocs_Classification docClassify = new NBDocs_Classification("data/train/labeledBow.txt", "data/test/Labeledtest.txt"," Basic ");
+        NBDocs_Classification stopwordClassify = new NBDocs_Classification("data/no_stopwords_train.txt", "data/no_stopwords_test.txt"," Stopword Removed ");
+
+          
    }
-    public void printStats()
+    public void printStats(String type)
     {
-        System.out.println("For Positive Sentiment of Basic NB, Precision is " + compute.positivePrecision() + "% and Recall is " + compute.positiveRecall() + "%"); 
-        System.out.println("For Negative Sentiment of Basic NB, Precision is " + compute.negativePrecision() + "% and Recall is " + compute.negativeRecall() + "%"); 
+        System.out.println("For Positive Sentiment of" + type + "NB, Precision is " + compute.positivePrecision() + "% and Recall is " + compute.positiveRecall() + "%"); 
+        System.out.println("For Negative Sentiment of" + type + "NB, Precision is " + compute.negativePrecision() + "% and Recall is " + compute.negativeRecall() + "%"); 
     }
     public void calculateProb()
     {
