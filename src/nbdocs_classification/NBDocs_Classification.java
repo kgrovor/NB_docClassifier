@@ -27,6 +27,7 @@ class Compute
     long numberNegative = 0;
     long numberDocs = 0;
     long correctlyPos = 0,wronglyPos = 0, correctlyNeg = 0, wronglyNeg = 0;
+    long numberEqual = 0;
     /**
      * 
      * @param word Index of word
@@ -65,6 +66,10 @@ class Compute
                 wronglyPos++;
             }
         }
+        if(actual == estimate)
+        {
+            numberEqual++;
+        }
        numberDocs++;
     }
     
@@ -92,6 +97,10 @@ class Compute
      {
          return (((2*negativePrecision()*negativeRecall())/(negativePrecision() + negativeRecall())))/10000;
      }
+      public double precision()
+      {
+          return ((double)numberEqual/numberDocs);
+      }
     
 }
 
@@ -140,6 +149,7 @@ public class NBDocs_Classification {
         NBDocs_Classification docClassify = new NBDocs_Classification("data/train/labeledBow.txt", "data/test/Labeledtest.txt"," Basic ", 0);
         NBDocs_Classification stopwordClassify = new NBDocs_Classification("data/no_stopwords_train.txt", "data/no_stopwords_test.txt"," Stopword Removed ", 0);
         NBDocs_Classification binClassify = new NBDocs_Classification("data/train/labeledBow.txt", "data/test/Labeledtest.txt"," Binary ", 1);
+        NBDocs_Classification binStopwordClassify = new NBDocs_Classification("data/no_stopwords_train.txt", "data/no_stopwords_test.txt"," Stopwords Removed Binary ", 1);
           
    }
     /**
@@ -151,7 +161,7 @@ public class NBDocs_Classification {
     {
         System.out.println("For Positive Sentiment of" + type + "NB, Precision is " + compute.positivePrecision() + "% , Recall is " + compute.positiveRecall() + "%" + " and F1 measure is " + compute.positivef1()); 
         System.out.println("For Negative Sentiment of" + type + "NB, Precision is " + compute.negativePrecision() + "% , Recall is " + compute.negativeRecall() + "%" + " and F1 measure is " + compute.negativef1()); 
-        System.out.println("");
+        System.out.println("Overall Accuracy is " + compute.precision()*100 + "%\n");
     }
     /**
      * Calculates P(+ve) / P(-ve) term of Naive Bayes
