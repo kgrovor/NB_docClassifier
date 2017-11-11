@@ -91,11 +91,11 @@ class Compute
      }
      public double positivef1()
      {
-         return ((2*positivePrecision()*positiveRecall())/positivePrecision() + positiveRecall())/10000;
+         return ((2*positivePrecision()*positiveRecall())/(positivePrecision() + positiveRecall()))/100;
      }
       public double negativef1()
      {
-         return (((2*negativePrecision()*negativeRecall())/(negativePrecision() + negativeRecall())))/10000;
+         return (((2*negativePrecision()*negativeRecall())/(negativePrecision() + negativeRecall())))/100;
      }
       public double precision()
       {
@@ -183,7 +183,7 @@ public class NBDocs_Classification {
         int sentiment,word,freq;
         String currentToken;
         StringTokenizer docToken = new StringTokenizer(token, " ");
-        if(Character.getNumericValue(docToken.nextToken().charAt(0)) >= 7)
+        if(Integer.parseInt(docToken.nextToken()) >= 7)
                 sentiment = 1;
         else 
             sentiment = 0; //Negative -> 0
@@ -209,11 +209,11 @@ public class NBDocs_Classification {
      */
     public void testInstance(String token, int bool_freq)
     {
-        int estimateSentiment,word=0,freq=1,actualSentiment;
+        int estimateSentiment,word=0,freq=1,actualSentiment ;
         double pPositive = 0,pNegative = 0, resultProb = 0;
         String currentToken,temp= "temp",temp2="temp";
         StringTokenizer docToken = new StringTokenizer(token, " ");
-        if(Character.getNumericValue(docToken.nextToken().charAt(0)) >= 7)
+        if((Integer.parseInt(docToken.nextToken())) >= 7)
                 actualSentiment = 1;
         else 
             actualSentiment = 0;
@@ -236,7 +236,7 @@ public class NBDocs_Classification {
             
         }
         
-        if((pPositive + Math.log10(probpos)) >= pNegative + Math.log10(probneg))
+        if((pPositive + Math.log10(probpos)) > pNegative + Math.log10(probneg))
         {
             
             estimateSentiment = 1;
