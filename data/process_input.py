@@ -21,3 +21,6 @@ for i in range(len(doc)):
         
     doc[i] = rating + " " + ' '.join(ind)
 doc = '\n'.join(doc)
+text_file = open("Output.txt", "w")
+text_file.write(doc)
+text_file.close()

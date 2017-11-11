@@ -146,10 +146,10 @@ public class NBDocs_Classification {
     double probpos, probneg;
     int binary;
     public static void main(String[] args) throws IOException {
-        NBDocs_Classification docClassify = new NBDocs_Classification("data/train/labeledBow.txt", "data/test/Labeledtest.txt"," Basic ", 0);
-        NBDocs_Classification stopwordClassify = new NBDocs_Classification("data/no_stopwords_train.txt", "data/no_stopwords_test.txt"," Stopword Removed ", 0);
-        NBDocs_Classification binClassify = new NBDocs_Classification("data/train/labeledBow.txt", "data/test/Labeledtest.txt"," Binary ", 1);
-        NBDocs_Classification binStopwordClassify = new NBDocs_Classification("data/no_stopwords_train.txt", "data/no_stopwords_test.txt"," Stopwords Removed Binary ", 1);
+        NBDocs_Classification docClassify = new NBDocs_Classification("../../data/train/labeledBow.txt", "../../data/test/Labeledtest.txt"," Basic ", 0);
+        NBDocs_Classification stopwordClassify = new NBDocs_Classification("../../data/no_stopwords_train.txt", "../../data/no_stopwords_test.txt"," Stopword Removed ", 0);
+        NBDocs_Classification binClassify = new NBDocs_Classification("../../data/train/labeledBow.txt", "../../data/test/Labeledtest.txt"," Binary ", 1);
+        NBDocs_Classification binStopwordClassify = new NBDocs_Classification("../../data/no_stopwords_train.txt", "../../data/no_stopwords_test.txt"," Stopwords Removed Binary ", 1);
           
    }
     /**
