@@ -236,7 +236,7 @@ public class NBDocs_Classification {
             
         }
         
-        if((pPositive + Math.log10(probpos)) > pNegative + Math.log10(probneg))
+        if((pPositive + Math.log10(probpos)) >= pNegative + Math.log10(probneg))
         {
             
             estimateSentiment = 1;
